@@ -4,7 +4,7 @@ import "./ICrossChain.sol";
 
 contract CrossChainCaller {
 // Function to get gas price by calling the getGasPrice function of the ICrossChain implementation
-    function callGasPrice(int64 chainID) external returns (
+    function callGasPrice(int64 chainID) external view returns (
         string memory creator,
         string memory index,
         int64 chainId,
@@ -24,7 +24,7 @@ contract CrossChainCaller {
         bytes memory encodedData = abi.encodePacked(functionSignature, padding, encodedChainID);
 
         // Call the precompiled contract at the address
-        (bool success, bytes memory returnData) = address(ICROSSCHAIN_PRECOMPILE_ADDRESS).call(encodedData);
+        (bool success, bytes memory returnData) = address(ICROSSCHAIN_PRECOMPILE_ADDRESS).staticcall(encodedData);
 
         // Decode return data if successful
         if (success) {

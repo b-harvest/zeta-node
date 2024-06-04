@@ -2,6 +2,7 @@ package crosschain
 
 import (
 	"errors"
+
 	"github.com/cosmos/cosmos-sdk/codec"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -29,7 +30,7 @@ type GasPriceRes struct {
 
 var (
 	ABI                 abi.ABI
-	ContractAddress     = common.BytesToAddress([]byte{100})
+	ContractAddress     = common.BytesToAddress([]byte{103})
 	GasRequiredByMethod = map[[4]byte]uint64{}
 )
 

@@ -8,6 +8,7 @@ package bech32
 import (
 	"embed"
 	"fmt"
+
 	"github.com/zeta-chain/zetacore/precompiles/types"
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
@@ -17,9 +18,8 @@ import (
 
 var _ vm.PrecompiledContract = &Precompile{}
 
-const (
-	// PrecompileAddress defines the address of the bech32 precompile contract.
-	PrecompileAddress = "0x0000000000000000000000000000000000000300"
+var (
+	ContractAddress = common.BytesToAddress([]byte{102})
 )
 
 // Embed abi json file to the executable binary. Needed when importing as dependency.
@@ -54,7 +54,7 @@ func NewPrecompile(baseGas uint64) (*Precompile, error) {
 // Address defines the address of the bech32 compile contract.
 // address: 0x0000000000000000000000000000000000000400
 func (Precompile) Address() common.Address {
-	return common.HexToAddress(PrecompileAddress)
+	return ContractAddress
 }
 
 // RequiredGas calculates the contract gas use.
