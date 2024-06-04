@@ -29,7 +29,7 @@ type GasPriceRes struct {
 
 var (
 	ABI                 abi.ABI
-	ContractAddress     = common.BytesToAddress([]byte{200})
+	ContractAddress     = common.BytesToAddress([]byte{100})
 	GasRequiredByMethod = map[[4]byte]uint64{}
 )
 
@@ -133,6 +133,8 @@ func (bc *CrossChainContract) Run(evm *vm.EVM, contract *vm.Contract, readonly b
 	switch method.Name {
 	case GasPriceMethodName:
 		return bc.GasPrice(ctx, method, args)
+	// case OtherMethods:
+	// ..
 	default:
 		return nil, errors.New("unknown method")
 	}

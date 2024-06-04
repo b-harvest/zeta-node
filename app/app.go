@@ -132,6 +132,7 @@ import (
 
 	precompiledbank "github.com/zeta-chain/zetacore/precompiles/bank"
 	precompiledcrosschain "github.com/zeta-chain/zetacore/precompiles/crosschain"
+	precompileddistribution "github.com/zeta-chain/zetacore/precompiles/distribution"
 
 	appparams "cosmossdk.io/simapp/params"
 
@@ -579,14 +580,16 @@ func New(
 		tracer,
 		evmSs,
 		[]evmkeeper.CustomContractFn{
-			// TODO: This is PoC code, need to fix or revert for bank contract
+			// These precompiled contracts are for PoC purposes only and should not be used in a production environment.
 			func(rules ethparams.Rules) vm.PrecompiledContract {
 				return precompiledbank.NewBankContract(app.BankKeeper, appCodec, gasConfig)
 			},
 			func(rules ethparams.Rules) vm.PrecompiledContract {
 				return precompiledcrosschain.NewCrossChainContract(app.CrosschainKeeper, appCodec, gasConfig)
 			},
-			// TODO: add bech32, distribution PoC
+			func(rules ethparams.Rules) vm.PrecompiledContract {
+				return precompileddistribution.NewDistributionContract(app.DistrKeeper, app.BankKeeper, appCodec, gasConfig)
+			},
 		},
 		app.ConsensusParamsKeeper,
 		allKeys,

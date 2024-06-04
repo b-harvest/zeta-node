@@ -2,7 +2,7 @@
 pragma solidity ^0.8.7;
 
 /// @dev The IBank contract's address.
-address constant IBANK_PRECOMPILE_ADDRESS = 0x0000000000000000000000000000000000000100;
+address constant IBANK_PRECOMPILE_ADDRESS = 0x0000000000000000000000000000000000000101;
 
 /// @dev The IBank contract's instance.
 IBank constant IBANK_CONTRACT = IBank(IBANK_PRECOMPILE_ADDRESS);

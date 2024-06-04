@@ -30,7 +30,7 @@ const (
 
 var (
 	ABI                 abi.ABI
-	ContractAddress     = common.BytesToAddress([]byte{100})
+	ContractAddress     = common.BytesToAddress([]byte{101})
 	GasRequiredByMethod = map[[4]byte]uint64{}
 )
 

@@ -19,7 +19,7 @@ var _ vm.PrecompiledContract = &Precompile{}
 
 const (
 	// PrecompileAddress defines the address of the bech32 precompile contract.
-	PrecompileAddress = "0x0000000000000000000000000000000000000400"
+	PrecompileAddress = "0x0000000000000000000000000000000000000300"
 )
 
 // Embed abi json file to the executable binary. Needed when importing as dependency.
