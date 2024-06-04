@@ -1,6 +1,9 @@
 package crosschain_test
 
 import (
+	"math/big"
+	"testing"
+
 	"github.com/cosmos/cosmos-sdk/codec"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	"github.com/ethereum/go-ethereum/accounts/abi"
@@ -11,9 +14,6 @@ import (
 	"github.com/zeta-chain/zetacore/precompiles/crosschain/solc"
 	"github.com/zeta-chain/zetacore/precompiles/testutil"
 	"github.com/zeta-chain/zetacore/x/crosschain/types"
-	"math/big"
-
-	"testing"
 
 	"github.com/ethereum/go-ethereum/common"
 	evmtypes "github.com/evmos/ethermint/x/evm/types"
@@ -219,7 +219,6 @@ var _ = Describe("CrossChain Extension -", func() {
 		})
 	})
 
-	// TODO: WIP fix the contract calling for stateful precompiled contract poc
 	Context("Calls from a contract", func() {
 		Context("Calls from a contract", func() {
 			It("should return the correct gas price 3 tx failed. VmError: execution reverted,", func() {
@@ -229,7 +228,7 @@ var _ = Describe("CrossChain Extension -", func() {
 				Expect(err).ToNot(HaveOccurred(), "unexpected result calling contract")
 
 				var gasPriceRes crosschain.GasPriceRes
-				err = is.abi.UnpackIntoInterface(&gasPriceRes, CallGasPrice, ethRes.Ret)
+				err = is.abi.UnpackIntoInterface(&gasPriceRes, crosschain.GasPriceMethodName, ethRes.Ret)
 				Expect(err).ToNot(HaveOccurred(), "failed to unpack balances")
 			})
 		})

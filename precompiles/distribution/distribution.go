@@ -3,6 +3,8 @@ package distribution
 import (
 	"errors"
 	"fmt"
+	"math/big"
+
 	"github.com/cosmos/cosmos-sdk/codec"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -11,7 +13,6 @@ import (
 	distributiontypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 	"github.com/evmos/ethermint/types"
 	evmtypes "github.com/evmos/ethermint/x/evm/types"
-	"math/big"
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -37,7 +38,7 @@ type GasPriceRes struct {
 
 var (
 	ABI                 abi.ABI
-	ContractAddress     = common.BytesToAddress([]byte{200})
+	ContractAddress     = common.BytesToAddress([]byte{104})
 	GasRequiredByMethod = map[[4]byte]uint64{}
 
 	BaseDenom     = "azeta"

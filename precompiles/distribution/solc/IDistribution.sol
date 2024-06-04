@@ -4,7 +4,7 @@ pragma solidity ^0.8.7;
 import "./CosmosTypes.sol";
 
 /// @dev The DistributionI contract's address.
-address constant DISTRIBUTION_PRECOMPILE_ADDRESS = 0x0000000000000000000000000000000000000200;
+address constant DISTRIBUTION_PRECOMPILE_ADDRESS = 0x0000000000000000000000000000000000000068; // 104
 
 /// @dev Define all the available distribution methods.
 string constant MSG_WITHDRAW_DELEGATOR_REWARD = "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward";
