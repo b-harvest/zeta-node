@@ -1,9 +1,9 @@
 // Copyright Tharsis Labs Ltd.(Evmos)
 // SPDX-License-Identifier:ENCL-1.0(https://github.com/evmos/evmos/blob/main/LICENSE)
+
 package grpc
 
 import (
-	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
 	"github.com/ethereum/go-ethereum/common"
 	evmtypes "github.com/evmos/ethermint/x/evm/types"
 	feemarkettypes "github.com/evmos/ethermint/x/feemarket/types"
@@ -23,10 +23,6 @@ type Handler interface {
 
 	// FeeMarket methods
 	GetBaseFee() (*feemarkettypes.QueryBaseFeeResponse, error)
-
-	// Gov methods
-	GetProposal(proposalID uint64) (*govtypes.QueryProposalResponse, error)
-	GetGovParams(paramsType string) (*govtypes.QueryParamsResponse, error)
 }
 
 var _ Handler = (*IntegrationHandler)(nil)

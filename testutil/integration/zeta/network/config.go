@@ -1,5 +1,6 @@
 // Copyright Tharsis Labs Ltd.(Evmos)
 // SPDX-License-Identifier:ENCL-1.0(https://github.com/evmos/evmos/blob/main/LICENSE)
+
 package network
 
 import (
@@ -30,9 +31,8 @@ func DefaultConfig() Config {
 	account, _ := testtx.NewAccAddressAndKey()
 	return Config{
 		//chainID:            string(chains.ZetaMocknetChain.ChainId) + "-1",
-		chainID: "test_70000-1",
-		// TODO: fix
-		eip155ChainID:      big.NewInt(9001),
+		chainID:            "test_70000-1",
+		eip155ChainID:      big.NewInt(70000),
 		amountOfValidators: 3,
 		// No funded accounts besides the validators by default
 		preFundedAccounts: []sdktypes.AccAddress{account},

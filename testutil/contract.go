@@ -1,5 +1,6 @@
 // Copyright Tharsis Labs Ltd.(Evmos)
 // SPDX-License-Identifier:ENCL-1.0(https://github.com/evmos/evmos/blob/main/LICENSE)
+
 package testutil
 
 import (
@@ -43,116 +44,6 @@ type ContractCallArgs struct {
 	// PrivKey is the private key to be used for the transaction.
 	PrivKey cryptotypes.PrivKey
 }
-
-//// TransactionArgs encapsulates all possible params to create all EVM txs types.
-//// This includes LegacyTx, DynamicFeeTx and AccessListTx
-//type EvmTxArgs struct {
-//	Nonce     uint64
-//	GasLimit  uint64
-//	Input     []byte
-//	GasFeeCap *big.Int
-//	GasPrice  *big.Int
-//	ChainID   *big.Int
-//	Amount    *big.Int
-//	GasTipCap *big.Int
-//	To        *common.Address
-//	Accesses  *ethtypes.AccessList
-//}
-
-//// DeployContract deploys a contract with the provided private key,
-//// compiled contract data and constructor arguments
-//func DeployContract(
-//	ctx sdk.Context,
-//	simapp *app.App,
-//	priv cryptotypes.PrivKey,
-//	queryClientEvm evm.QueryClient,
-//	contract evm.CompiledContract,
-//	constructorArgs ...interface{},
-//) (common.Address, error) {
-//	chainID := simapp.EvmKeeper.ChainID()
-//	from := common.BytesToAddress(priv.PubKey().Address().Bytes())
-//	nonce := simapp.EvmKeeper.GetNonce(ctx, from)
-//
-//	ctorArgs, err := contract.ABI.Pack("", constructorArgs...)
-//	if err != nil {
-//		return common.Address{}, err
-//	}
-//
-//	data := append(contract.Bin, ctorArgs...) //nolint:gocritic
-//	//gas, err := tx.GasLimit(ctx, from, data, queryClientEvm)
-//	if err != nil {
-//		return common.Address{}, err
-//	}
-//
-//	msgEthereumTx := evm.NewTx(
-//		chainID,
-//		nonce,
-//		nil,
-//		big.NewInt(0),
-//		flags.DefaultGasLimit,
-//		big.NewInt(100000000000),
-//		simapp.FeeMarketKeeper.GetBaseFee(ctx),
-//		big.NewInt(1),
-//		data,
-//		&ethtypes.AccessList{},
-//	)
-//	msgEthereumTx.From = from.String()
-//
-//	res, err := DeliverEthTx(simapp, priv, msgEthereumTx)
-//	if err != nil {
-//		return common.Address{}, err
-//	}
-//
-//	if _, err := CheckEthTxResponse(res, simapp.AppCodec()); err != nil {
-//		return common.Address{}, err
-//	}
-//
-//	return crypto.CreateAddress(from, nonce), nil
-//}
-//
-//// DeployContractWithFactory deploys a contract using a contract factory
-//// with the provided factoryAddress
-//func DeployContractWithFactory(
-//	ctx sdk.Context,
-//	simapp *app.App,
-//	priv cryptotypes.PrivKey,
-//	factoryAddress common.Address,
-//) (common.Address, abci.ResponseDeliverTx, error) {
-//	chainID := simapp.EvmKeeper.ChainID()
-//	from := common.BytesToAddress(priv.PubKey().Address().Bytes())
-//	factoryNonce := simapp.EvmKeeper.GetNonce(ctx, factoryAddress)
-//	nonce := simapp.EvmKeeper.GetNonce(ctx, from)
-//
-//	msgEthereumTx := evm.NewTx(
-//		chainID,
-//		nonce,
-//		&factoryAddress,
-//		big.NewInt(0),
-//		uint64(100000),
-//		big.NewInt(100000000000),
-//		simapp.FeeMarketKeeper.GetBaseFee(ctx),
-//		big.NewInt(1),
-//		nil,
-//		&ethtypes.AccessList{},
-//		//ChainID:  chainID,
-//		//Nonce:    nonce,
-//		//To:       &factoryAddress,
-//		//GasLimit: uint64(100000),
-//		//GasPrice: big.NewInt(1000000000),
-//	)
-//	msgEthereumTx.From = from.String()
-//
-//	res, err := DeliverEthTx(simapp, priv, msgEthereumTx)
-//	if err != nil {
-//		return common.Address{}, abci.ResponseDeliverTx{}, err
-//	}
-//
-//	if _, err := CheckEthTxResponse(res, simapp.AppCodec()); err != nil {
-//		return common.Address{}, abci.ResponseDeliverTx{}, err
-//	}
-//
-//	return crypto.CreateAddress(factoryAddress, factoryNonce), res, err
-//}
 
 // CheckEthTxResponse checks that the transaction was executed successfully
 func CheckEthTxResponse(r abci.ResponseDeliverTx, cdc codec.Codec) ([]*evm.MsgEthereumTxResponse, error) {

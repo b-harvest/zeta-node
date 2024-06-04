@@ -1,8 +1,7 @@
 // Copyright Tharsis Labs Ltd.(Evmos)
 // SPDX-License-Identifier:ENCL-1.0(https://github.com/evmos/evmos/blob/main/LICENSE)
-package tx
 
-// TODO: refactor to License
+package tx
 
 import (
 	"github.com/zeta-chain/zetacore/cmd/zetacored/config"

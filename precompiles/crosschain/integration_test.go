@@ -158,8 +158,6 @@ var _ = Describe("CrossChain Extension -", func() {
 
 		gas      = hexutil.Uint64(900000)
 		gasPrice = (*hexutil.Big)(big.NewInt(875000000))
-		//gas      = hexutil.Uint64(1000000)
-		//gasPrice = (*hexutil.Big)(big.NewInt(875000000))
 	)
 
 	BeforeEach(func() {
@@ -202,7 +200,7 @@ var _ = Describe("CrossChain Extension -", func() {
 				Expect(err).ToNot(HaveOccurred(), "unexpected result calling contract")
 
 				err = is.abi.UnpackIntoInterface(&gasPriceRes, crosschain.GasPriceMethodName, ethRes.Ret)
-				Expect(err).ToNot(HaveOccurred(), "failed to unpack balances")
+				Expect(err).ToNot(HaveOccurred(), "failed to unpack gas price")
 				Expect(gasPriceRes).To(Equal(dummyGasPriceRes))
 			})
 
@@ -221,15 +219,16 @@ var _ = Describe("CrossChain Extension -", func() {
 
 	Context("Calls from a contract", func() {
 		Context("Calls from a contract", func() {
-			It("should return the correct gas price 3 tx failed. VmError: execution reverted,", func() {
-				queryArgs, balancesArgs := getTxAndCallArgs(contractCall, contractData, CallGasPrice, dummyGasPrice.ChainId)
-				queryArgs.Gas = &gas
-				_, ethRes, err := is.factory.CallContractAndCheckLogs(sender.Priv, queryArgs, balancesArgs, passCheck)
+			It("should return the correct gas price", func() {
+				txArgs, callArgs := getTxAndCallArgs(contractCall, contractData, CallGasPrice, dummyGasPrice.ChainId)
+				txArgs.Gas = &gas
+				_, ethRes, err := is.factory.CallContractAndCheckLogs(sender.Priv, txArgs, callArgs, passCheck)
 				Expect(err).ToNot(HaveOccurred(), "unexpected result calling contract")
 
 				var gasPriceRes crosschain.GasPriceRes
-				err = is.abi.UnpackIntoInterface(&gasPriceRes, crosschain.GasPriceMethodName, ethRes.Ret)
-				Expect(err).ToNot(HaveOccurred(), "failed to unpack balances")
+				err = contractData.contractABI.UnpackIntoInterface(&gasPriceRes, CallGasPrice, ethRes.Ret)
+				Expect(err).ToNot(HaveOccurred(), "failed to unpack gas price")
+				Expect(gasPriceRes).To(Equal(dummyGasPriceRes))
 			})
 		})
 	})

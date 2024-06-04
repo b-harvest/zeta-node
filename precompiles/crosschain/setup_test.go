@@ -9,8 +9,6 @@ import (
 	"github.com/zeta-chain/zetacore/precompiles/crosschain"
 	"testing"
 
-	//inflationtypes "github.com/zeta-chain/zetacore/x/inflation/v1/types"
-
 	"github.com/stretchr/testify/suite"
 	"github.com/zeta-chain/zetacore/testutil/integration/zeta/factory"
 	"github.com/zeta-chain/zetacore/testutil/integration/zeta/grpc"

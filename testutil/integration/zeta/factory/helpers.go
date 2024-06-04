@@ -1,5 +1,6 @@
 // Copyright Tharsis Labs Ltd.(Evmos)
 // SPDX-License-Identifier:ENCL-1.0(https://github.com/evmos/evmos/blob/main/LICENSE)
+
 package factory
 
 import (
@@ -17,90 +18,6 @@ import (
 	etherminttypes "github.com/evmos/ethermint/types"
 	"github.com/zeta-chain/zetacore/testutil/tx"
 )
-
-// NewTx returns a reference to a new Ethereum transaction message.
-//func NewTx(
-//	tx *evmtypes.TransactionArgs,
-//) *evmtypes.MsgEthereumTx {
-//	return newMsgEthereumTx(tx)
-//}
-
-//
-//func newMsgEthereumTx(
-//	tx *evmtypes.TransactionArgs,
-//) *evmtypes.MsgEthereumTx {
-//	var (
-//		cid, amt, gp *sdkmath.Int
-//		toAddr       string
-//		txData       evmtypes.TxData
-//	)
-//
-//	if tx.To != nil {
-//		toAddr = tx.To.Hex()
-//	}
-//
-//	if tx.Amount != nil {
-//		amountInt := sdkmath.NewIntFromBigInt(tx.Amount)
-//		amt = &amountInt
-//	}
-//
-//	if tx.ChainID != nil {
-//		chainIDInt := sdkmath.NewIntFromBigInt(tx.ChainID)
-//		cid = &chainIDInt
-//	}
-//
-//	if tx.GasPrice != nil {
-//		gasPriceInt := sdkmath.NewIntFromBigInt(tx.GasPrice)
-//		gp = &gasPriceInt
-//	}
-//
-//	switch {
-//	case tx.GasFeeCap != nil:
-//		gtc := sdkmath.NewIntFromBigInt(tx.GasTipCap)
-//		gfc := sdkmath.NewIntFromBigInt(tx.GasFeeCap)
-//
-//		txData = &DynamicFeeTx{
-//			ChainID:   cid,
-//			Amount:    amt,
-//			To:        toAddr,
-//			GasTipCap: &gtc,
-//			GasFeeCap: &gfc,
-//			Nonce:     tx.Nonce,
-//			GasLimit:  tx.GasLimit,
-//			Data:      tx.Input,
-//			Accesses:  NewAccessList(tx.Accesses),
-//		}
-//	case tx.Accesses != nil:
-//		txData = &AccessListTx{
-//			ChainID:  cid,
-//			Nonce:    tx.Nonce,
-//			To:       toAddr,
-//			Amount:   amt,
-//			GasLimit: tx.GasLimit,
-//			GasPrice: gp,
-//			Data:     tx.Input,
-//			Accesses: NewAccessList(tx.Accesses),
-//		}
-//	default:
-//		txData = &LegacyTx{
-//			To:       toAddr,
-//			Amount:   amt,
-//			GasPrice: gp,
-//			Nonce:    tx.Nonce,
-//			GasLimit: tx.GasLimit,
-//			Data:     tx.Input,
-//		}
-//	}
-//
-//	dataAny, err := PackTxData(txData)
-//	if err != nil {
-//		panic(err)
-//	}
-//
-//	msg := MsgEthereumTx{Data: dataAny}
-//	msg.Hash = msg.AsTransaction().Hash().Hex()
-//	return &msg
-//}
 
 // buildMsgEthereumTx builds an Ethereum transaction from the given arguments and populates the From field.
 func buildMsgEthereumTx(txArgs evmtypes.TransactionArgs, fromAddr common.Address) evmtypes.MsgEthereumTx {

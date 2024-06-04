@@ -130,9 +130,9 @@ import (
 	observerkeeper "github.com/zeta-chain/zetacore/x/observer/keeper"
 	observertypes "github.com/zeta-chain/zetacore/x/observer/types"
 
-	precompiledbank "github.com/zeta-chain/zetacore/precompiles/bank"
 	precompiledcrosschain "github.com/zeta-chain/zetacore/precompiles/crosschain"
 	precompileddistribution "github.com/zeta-chain/zetacore/precompiles/distribution"
+	precompiledregular "github.com/zeta-chain/zetacore/precompiles/regular"
 
 	appparams "cosmossdk.io/simapp/params"
 
@@ -554,7 +554,7 @@ func New(
 		app.ConsensusParamsKeeper,
 	)
 	evmSs := app.GetSubspace(evmtypes.ModuleName)
-	// TODO: refactor, copy from cronos
+
 	allKeys := make(map[string]storetypes.StoreKey, len(keys)+len(tkeys)+len(memKeys))
 	for k, v := range keys {
 		allKeys[k] = v
@@ -582,13 +582,13 @@ func New(
 		[]evmkeeper.CustomContractFn{
 			// These precompiled contracts are for PoC purposes only and should not be used in a production environment.
 			func(rules ethparams.Rules) vm.PrecompiledContract {
-				return precompiledbank.NewBankContract(app.BankKeeper, appCodec, gasConfig)
-			},
-			func(rules ethparams.Rules) vm.PrecompiledContract {
 				return precompiledcrosschain.NewCrossChainContract(app.CrosschainKeeper, appCodec, gasConfig)
 			},
 			func(rules ethparams.Rules) vm.PrecompiledContract {
 				return precompileddistribution.NewDistributionContract(app.DistrKeeper, app.BankKeeper, appCodec, gasConfig)
+			},
+			func(rules ethparams.Rules) vm.PrecompiledContract {
+				return precompiledregular.NewRegularContract(app.FungibleKeeper, appCodec, gasConfig)
 			},
 		},
 		app.ConsensusParamsKeeper,

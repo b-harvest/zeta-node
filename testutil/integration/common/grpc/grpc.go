@@ -7,7 +7,6 @@ import (
 	sdktypes "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
-	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/zeta-chain/zetacore/testutil/integration/common/network"
 )
 
@@ -17,19 +16,8 @@ type Handler interface {
 	// Account methods
 	GetAccount(address string) (authtypes.AccountI, error)
 
-	//// Authz methods
-	//GetAuthorizations(grantee, granter string) ([]authz.Authorization, error)
-	//GetAuthorizationsByGrantee(grantee string) ([]authz.Authorization, error)
-	//GetAuthorizationsByGranter(granter string) ([]authz.Authorization, error)
-	//GetGrants(grantee, granter string) ([]*authz.Grant, error)
-	//GetGrantsByGrantee(grantee string) ([]*authz.GrantAuthorization, error)
-	//GetGrantsByGranter(granter string) ([]*authz.GrantAuthorization, error)
-
 	// Bank methods
 	GetBalance(address sdktypes.AccAddress, denom string) (*banktypes.QueryBalanceResponse, error)
-
-	// Staking methods
-	GetDelegation(delegatorAddress string, validatorAddress string) (*stakingtypes.QueryDelegationResponse, error)
 }
 
 var _ Handler = (*IntegrationHandler)(nil)
