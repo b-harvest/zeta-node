@@ -40,7 +40,7 @@ func Setup(isCheckTx bool) *app.App {
 			abci.RequestInitChain{
 				ChainId:         "simnet_101-1",
 				Validators:      []abci.ValidatorUpdate{},
-				ConsensusParams: defaultConsensusParams,
+				ConsensusParams: DefaultConsensusParams,
 				AppStateBytes:   stateBytes,
 			},
 		)
@@ -135,7 +135,7 @@ func SetupWithGenesisValSet(t *testing.T, valSet *tmtypes.ValidatorSet, genDelAc
 		abci.RequestInitChain{
 			ChainId:         "simnet_101-1",
 			Validators:      []abci.ValidatorUpdate{},
-			ConsensusParams: defaultConsensusParams,
+			ConsensusParams: DefaultConsensusParams,
 			AppStateBytes:   stateBytes,
 		},
 	)
@@ -175,7 +175,7 @@ func SetupWithGenesisAccounts(genAccs []authtypes.GenesisAccount, balances ...ba
 	app.InitChain(
 		abci.RequestInitChain{
 			Validators:      []abci.ValidatorUpdate{},
-			ConsensusParams: defaultConsensusParams,
+			ConsensusParams: DefaultConsensusParams,
 			AppStateBytes:   stateBytes,
 		},
 	)

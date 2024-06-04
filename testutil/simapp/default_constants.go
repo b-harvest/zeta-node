@@ -7,7 +7,7 @@ import (
 	tmtypes "github.com/cometbft/cometbft/types"
 )
 
-var defaultConsensusParams = &tmproto.ConsensusParams{
+var DefaultConsensusParams = &tmproto.ConsensusParams{
 	Block: &tmproto.BlockParams{
 		MaxBytes: 200000,
 		MaxGas:   2000000,
