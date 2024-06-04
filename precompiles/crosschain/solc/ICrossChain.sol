@@ -1,7 +1,7 @@
 pragma solidity ^0.8.7;
 
 /// @dev The ICrossChain contract's address.
-address constant ICROSSCHAIN_PRECOMPILE_ADDRESS = 0x0000000000000000000000000000000000000100;
+address constant ICROSSCHAIN_PRECOMPILE_ADDRESS = 0x0000000000000000000000000000000000000064; // 200
 
 /// @dev The ICrossChain contract's instance.
 ICrossChain constant ICROSSCHAIN_CONTRACT = ICrossChain(ICROSSCHAIN_PRECOMPILE_ADDRESS);
