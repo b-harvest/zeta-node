@@ -1,11 +1,20 @@
 package keeper
 
 import (
+	"github.com/cometbft/cometbft/libs/log"
+	"github.com/cosmos/cosmos-sdk/store/rootmulti"
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
+	authoritykeeper "github.com/zeta-chain/zetacore/x/authority/keeper"
+	authoritytypes "github.com/zeta-chain/zetacore/x/authority/types"
+	fungiblekeeper "github.com/zeta-chain/zetacore/x/fungible/keeper"
+	lightclientkeeper "github.com/zeta-chain/zetacore/x/lightclient/keeper"
+	lightclienttypes "github.com/zeta-chain/zetacore/x/lightclient/types"
+	observerkeeper "github.com/zeta-chain/zetacore/x/observer/keeper"
 	"math/big"
 	"testing"
 
 	tmdb "github.com/cometbft/cometbft-db"
-	"github.com/cosmos/cosmos-sdk/store"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	ethcommon "github.com/ethereum/go-ethereum/common"
@@ -50,40 +59,60 @@ func CrosschainKeeperWithMocks(
 	t testing.TB,
 	mockOptions CrosschainMockOptions,
 ) (*keeper.Keeper, sdk.Context, SDKKeepers, ZetaKeepers) {
-	SetConfig(false)
-	storeKey := sdk.NewKVStoreKey(types.StoreKey)
-	memStoreKey := storetypes.NewMemoryStoreKey(types.MemStoreKey)
+	//SetConfig(false)
+	keys, memKeys, tkeys, allKeys := StoreKeys()
 
 	// Initialize local store
 	db := tmdb.NewMemDB()
-	stateStore := store.NewCommitMultiStore(db)
+	stateStore := rootmulti.NewStore(db, log.NewNopLogger())
 	cdc := NewCodec()
 
 	// Create regular keepers
-	sdkKeepers := NewSDKKeepers(cdc, db, stateStore)
+	sdkKeepers := NewSDKKeepersWithKeys(cdc, keys, tkeys, allKeys)
 
 	// Create zeta keepers
-	authorityKeeperTmp := initAuthorityKeeper(cdc, db, stateStore)
-	lightclientKeeperTmp := initLightclientKeeper(cdc, db, stateStore, authorityKeeperTmp)
-	observerKeeperTmp := initObserverKeeper(
+	//authorityKeeperTmp := initAuthorityKeeper(cdc, db, stateStore)
+	//lightclientKeeperTmp := initLightclientKeeper(cdc, db, stateStore, authorityKeeperTmp)
+
+	// Create authority keeper
+	authorityKeeperTmp := authoritykeeper.NewKeeper(
 		cdc,
-		db,
-		stateStore,
+		keys[authoritytypes.StoreKey],
+		memKeys[authoritytypes.MemStoreKey],
+		AuthorityGovAddress,
+	)
+
+	// Create lightclient keeper
+	lightclientKeeperTmp := lightclientkeeper.NewKeeper(
+		cdc,
+		keys[lightclienttypes.StoreKey],
+		memKeys[lightclienttypes.MemStoreKey],
+		authorityKeeperTmp,
+	)
+
+	// Create observer keeper
+	observerKeeperTmp := observerkeeper.NewKeeper(
+		cdc,
+		keys[observertypes.StoreKey],
+		memKeys[observertypes.MemStoreKey],
 		sdkKeepers.StakingKeeper,
 		sdkKeepers.SlashingKeeper,
 		authorityKeeperTmp,
 		lightclientKeeperTmp,
+		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
 	)
-	fungibleKeeperTmp := initFungibleKeeper(
+
+	fungibleKeeperTmp := fungiblekeeper.NewKeeper(
 		cdc,
-		db,
-		stateStore,
+		keys[types.StoreKey],
+		memKeys[types.MemStoreKey],
 		sdkKeepers.AuthKeeper,
-		sdkKeepers.BankKeeper,
 		sdkKeepers.EvmKeeper,
+		sdkKeepers.BankKeeper,
 		observerKeeperTmp,
 		authorityKeeperTmp,
 	)
+
 	zetaKeepers := ZetaKeepers{
 		ObserverKeeper:  observerKeeperTmp,
 		FungibleKeeper:  fungibleKeeperTmp,
@@ -94,9 +123,16 @@ func CrosschainKeeperWithMocks(
 	var observerKeeper types.ObserverKeeper = observerKeeperTmp
 	var fungibleKeeper types.FungibleKeeper = fungibleKeeperTmp
 
-	// Create the fungible keeper
-	stateStore.MountStoreWithDB(storeKey, storetypes.StoreTypeIAVL, db)
-	stateStore.MountStoreWithDB(memStoreKey, storetypes.StoreTypeMemory, nil)
+	for _, key := range keys {
+		stateStore.MountStoreWithDB(key, storetypes.StoreTypeIAVL, db)
+	}
+	for _, key := range tkeys {
+		stateStore.MountStoreWithDB(key, storetypes.StoreTypeTransient, nil)
+	}
+	for _, key := range memKeys {
+		stateStore.MountStoreWithDB(key, storetypes.StoreTypeMemory, nil)
+	}
+
 	require.NoError(t, stateStore.LoadLatestVersion())
 
 	ctx := NewContext(stateStore)
@@ -137,8 +173,8 @@ func CrosschainKeeperWithMocks(
 
 	k := keeper.NewKeeper(
 		cdc,
-		storeKey,
-		memStoreKey,
+		keys[types.StoreKey],
+		memKeys[types.MemStoreKey],
 		stakingKeeper,
 		authKeeper,
 		bankKeeper,

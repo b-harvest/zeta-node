@@ -1,6 +1,8 @@
 package keeper
 
 import (
+	"github.com/cosmos/cosmos-sdk/store"
+	capabilitytypes "github.com/cosmos/cosmos-sdk/x/capability/types"
 	"math/rand"
 	"testing"
 	"time"
@@ -10,7 +12,6 @@ import (
 	"github.com/cometbft/cometbft/libs/log"
 	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	"github.com/cosmos/cosmos-sdk/codec"
-	"github.com/cosmos/cosmos-sdk/store"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authkeeper "github.com/cosmos/cosmos-sdk/x/auth/keeper"
@@ -34,7 +35,6 @@ import (
 	evmmodule "github.com/evmos/ethermint/x/evm"
 	evmkeeper "github.com/evmos/ethermint/x/evm/keeper"
 	evmtypes "github.com/evmos/ethermint/x/evm/types"
-	"github.com/evmos/ethermint/x/evm/vm/geth"
 	feemarketkeeper "github.com/evmos/ethermint/x/feemarket/keeper"
 	feemarkettypes "github.com/evmos/ethermint/x/feemarket/types"
 	"github.com/stretchr/testify/require"
@@ -58,7 +58,7 @@ import (
 )
 
 // NewContext creates a new sdk.Context for testing purposes with initialized header
-func NewContext(stateStore sdk.CommitMultiStore) sdk.Context {
+func NewContext(stateStore sdk.MultiStore) sdk.Context {
 	header := tmproto.Header{
 		Height:  1,
 		ChainID: "test_7000-1",
@@ -116,6 +116,13 @@ var moduleAccountPerms = map[string][]string{
 	emissionstypes.UndistributedObserverRewardsPool: nil,
 	emissionstypes.UndistributedTssRewardsPool:      nil,
 }
+
+var (
+	testStoreKeys = sdk.NewKVStoreKeys(authtypes.StoreKey, banktypes.StoreKey, evmtypes.StoreKey, consensustypes.StoreKey)
+	//testStoreKeys     = sdk.NewKVStoreKeys(authtypes.StoreKey, banktypes.StoreKey, evmtypes.StoreKey, consensustypes.StoreKey, "testnative")
+	testTransientKeys = sdk.NewTransientStoreKeys(evmtypes.TransientKey)
+	testMemKeys       = sdk.NewMemoryStoreKeys(capabilitytypes.MemStoreKey)
+)
 
 // ModuleAccountAddrs returns all the app's module account addresses.
 func ModuleAccountAddrs(maccPerms map[string][]string) map[string]bool {
@@ -317,6 +324,17 @@ func EVMKeeper(
 	ss.MountStoreWithDB(storeKey, storetypes.StoreTypeIAVL, db)
 	ss.MountStoreWithDB(transientKey, storetypes.StoreTypeTransient, db)
 
+	allKeys := make(map[string]storetypes.StoreKey, len(testStoreKeys)+len(testTransientKeys)+len(testMemKeys))
+	for k, v := range testStoreKeys {
+		allKeys[k] = v
+	}
+	for k, v := range testTransientKeys {
+		allKeys[k] = v
+	}
+	for k, v := range testMemKeys {
+		allKeys[k] = v
+	}
+
 	k := evmkeeper.NewKeeper(
 		cdc,
 		storeKey,
@@ -326,14 +344,98 @@ func EVMKeeper(
 		bankKeeper,
 		stakingKeeper,
 		feemarketKeeper,
-		nil,
-		geth.NewEVM,
 		"",
 		paramKeeper.Subspace(evmtypes.ModuleName),
+		nil,
 		consensusKeeper,
+		allKeys,
 	)
 
+	//ctx := sdk.NewContext(cms, tmproto.Header{}, false, log.NewNopLogger())
+
 	return k
+}
+
+// NewSDKKeepers instantiates regular Cosmos SDK keeper such as staking with local storage for testing purposes
+func NewSDKKeepersWithKeys(
+	cdc codec.Codec,
+	keys map[string]*storetypes.KVStoreKey,
+	tKeys map[string]*storetypes.TransientStoreKey,
+	allKeys map[string]storetypes.StoreKey,
+) SDKKeepers {
+	paramsKeeper := paramskeeper.NewKeeper(
+		cdc,
+		fungibletypes.Amino,
+		keys[paramstypes.StoreKey],
+		tKeys[paramstypes.TStoreKey],
+	)
+	authKeeper := authkeeper.NewAccountKeeper(
+		cdc,
+		keys[authtypes.StoreKey],
+		ethermint.ProtoAccount,
+		moduleAccountPerms,
+		"zeta",
+		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
+	)
+	blockedAddrs := make(map[string]bool)
+	bankKeeper := bankkeeper.NewBaseKeeper(
+		cdc,
+		keys[banktypes.StoreKey],
+		authKeeper,
+		blockedAddrs,
+		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
+	)
+	stakingKeeper := *stakingkeeper.NewKeeper(
+		cdc,
+		keys[stakingtypes.StoreKey],
+		authKeeper,
+		bankKeeper,
+		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
+	)
+	consensusKeeper := consensuskeeper.NewKeeper(
+		cdc,
+		keys[consensustypes.StoreKey],
+		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
+	)
+	feeMarketKeeper := feemarketkeeper.NewKeeper(
+		cdc,
+		authtypes.NewModuleAddress(govtypes.ModuleName),
+		keys[feemarkettypes.StoreKey],
+		tKeys[feemarkettypes.TransientKey],
+		paramsKeeper.Subspace(feemarkettypes.ModuleName),
+		consensusKeeper,
+	)
+	evmKeeper := evmkeeper.NewKeeper(
+		cdc,
+		keys[evmtypes.StoreKey],
+		tKeys[evmtypes.TransientKey],
+		authtypes.NewModuleAddress(govtypes.ModuleName),
+		authKeeper,
+		bankKeeper,
+		stakingKeeper,
+		feeMarketKeeper,
+		"",
+		paramsKeeper.Subspace(evmtypes.ModuleName),
+		nil,
+		consensusKeeper,
+		allKeys,
+	)
+	slashingKeeper := slashingkeeper.NewKeeper(
+		cdc,
+		codec.NewLegacyAmino(),
+		keys[slashingtypes.StoreKey],
+		stakingKeeper,
+		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
+	)
+	return SDKKeepers{
+		ParamsKeeper:    paramsKeeper,
+		AuthKeeper:      authKeeper,
+		BankKeeper:      bankKeeper,
+		StakingKeeper:   stakingKeeper,
+		FeeMarketKeeper: feeMarketKeeper,
+		EvmKeeper:       evmKeeper,
+		SlashingKeeper:  slashingKeeper,
+	}
 }
 
 // NewSDKKeepers instantiates regular Cosmos SDK keeper such as staking with local storage for testing purposes

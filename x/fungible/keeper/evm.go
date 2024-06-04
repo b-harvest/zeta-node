@@ -785,5 +785,13 @@ func (k Keeper) CallEVMWithData(
 		}
 	}
 
+	// TODO: if the call is from an precompiled contract call, then re-emit the logs into the original stateDB.
+	//// if the call is from an precompiled contract call, then re-emit the logs into the original stateDB.
+	//if stateDB, ok := ctx.Value(statedb.StateDBContextKey).(vm.StateDB); ok {
+	//	for _, l := range ret.Logs {
+	//		stateDB.AddLog(l.ToEthereum())
+	//	}
+	//}
+
 	return res, nil
 }

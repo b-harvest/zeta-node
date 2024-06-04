@@ -11,7 +11,6 @@ import (
 	"github.com/rakyll/statik/fs"
 	"github.com/spf13/cast"
 
-	appparams "cosmossdk.io/simapp/params"
 	dbm "github.com/cometbft/cometbft-db"
 	abci "github.com/cometbft/cometbft/abci/types"
 	tmjson "github.com/cometbft/cometbft/libs/json"
@@ -96,7 +95,6 @@ import (
 	"github.com/evmos/ethermint/x/evm"
 	evmkeeper "github.com/evmos/ethermint/x/evm/keeper"
 	evmtypes "github.com/evmos/ethermint/x/evm/types"
-	"github.com/evmos/ethermint/x/evm/vm/geth"
 	"github.com/evmos/ethermint/x/feemarket"
 	feemarketkeeper "github.com/evmos/ethermint/x/feemarket/keeper"
 	feemarkettypes "github.com/evmos/ethermint/x/feemarket/types"
@@ -131,6 +129,14 @@ import (
 	observermodule "github.com/zeta-chain/zetacore/x/observer"
 	observerkeeper "github.com/zeta-chain/zetacore/x/observer/keeper"
 	observertypes "github.com/zeta-chain/zetacore/x/observer/types"
+
+	precompiledbank "github.com/zeta-chain/zetacore/precompiles/bank"
+	precompiledcrosschain "github.com/zeta-chain/zetacore/precompiles/crosschain"
+
+	appparams "cosmossdk.io/simapp/params"
+
+	"github.com/ethereum/go-ethereum/core/vm"
+	ethparams "github.com/ethereum/go-ethereum/params"
 )
 
 const Name = "zetacore"
@@ -547,6 +553,20 @@ func New(
 		app.ConsensusParamsKeeper,
 	)
 	evmSs := app.GetSubspace(evmtypes.ModuleName)
+	// TODO: refactor, copy from cronos
+	allKeys := make(map[string]storetypes.StoreKey, len(keys)+len(tkeys)+len(memKeys))
+	for k, v := range keys {
+		allKeys[k] = v
+	}
+	for k, v := range tkeys {
+		allKeys[k] = v
+	}
+	for k, v := range memKeys {
+		allKeys[k] = v
+	}
+
+	gasConfig := storetypes.TransientGasConfig()
+
 	app.EvmKeeper = evmkeeper.NewKeeper(
 		appCodec,
 		keys[evmtypes.StoreKey],
@@ -556,11 +576,20 @@ func New(
 		app.BankKeeper,
 		app.StakingKeeper,
 		&app.FeeMarketKeeper,
-		nil,
-		geth.NewEVM,
 		tracer,
 		evmSs,
+		[]evmkeeper.CustomContractFn{
+			// TODO: This is PoC code, need to fix or revert for bank contract
+			func(rules ethparams.Rules) vm.PrecompiledContract {
+				return precompiledbank.NewBankContract(app.BankKeeper, appCodec, gasConfig)
+			},
+			func(rules ethparams.Rules) vm.PrecompiledContract {
+				return precompiledcrosschain.NewCrossChainContract(app.CrosschainKeeper, appCodec, gasConfig)
+			},
+			// TODO: add bech32, distribution PoC
+		},
 		app.ConsensusParamsKeeper,
+		allKeys,
 	)
 
 	app.FungibleKeeper = *fungiblekeeper.NewKeeper(
@@ -627,8 +656,9 @@ func New(
 	app.EvidenceKeeper = *evidenceKeeper
 
 	app.EvmKeeper = app.EvmKeeper.SetHooks(evmkeeper.NewMultiEvmHooks(
-		app.CrosschainKeeper.Hooks(),
-		app.FungibleKeeper.EVMHooks(),
+	// TODO: temporary disable to stateful precompiled contract poc
+	//app.CrosschainKeeper.Hooks(),
+	//app.FungibleKeeper.EVMHooks(),
 	))
 
 	// seal the IBC router
